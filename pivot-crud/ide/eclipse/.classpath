@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="java"/>
+	<classpathentry kind="src" path="resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="var" path="PIVOT_CRUD_PROJECTS_HOME/lib/commons-beanutils-1.8.3.jar"/>
+	<classpathentry kind="var" path="PIVOT_CRUD_PROJECTS_HOME/lib/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="var" path="PIVOT_CRUD_PROJECTS_HOME/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="var" path="PIVOT_CRUD_PROJECTS_HOME/lib/pivot-core-2.0.jar"/>
+	<classpathentry kind="var" path="PIVOT_CRUD_PROJECTS_HOME/lib/pivot-web-2.0.jar"/>
+	<classpathentry kind="var" path="PIVOT_CRUD_PROJECTS_HOME/lib/pivot-wtk-2.0.jar"/>
+	<classpathentry kind="var" path="PIVOT_CRUD_PROJECTS_HOME/lib/pivot-wtk-terra-2.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

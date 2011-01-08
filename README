@@ -1,0 +1,201 @@
+pivot-crud-projects
+
+This is released with Apache 2 licence.
+
+----
+
+This is a sample project to demonstrate how to use generics, annotation, and builder style GUI description(using annonymous class, i.e, nee A{{...}})
+ to build CRUD GUI from generic library and entity classes annotated with presentation information.
+For the full CRUD, the entity beans should have JPA annotation as well. This sample does not have this client/server communication part nor DB access.
+But this simple form will serve the purpose better.
+
+
+----
+
+The Design:
+The basic design goal is to enable to create CRUD GUI just writing entity class with proper annotation for presentation.
+Since annotation has a restriction to basic type values (e.g, int, string ), there is a problem to define some Java object for the presentation specification.
+This will overcome this restrition by using JavaScripts, so when none primitive Java object is required for annotation value, just write javascripts as String.
+
+Builder style is easy to read and maintain. This style is systematically used.
+
+----
+Future Plan:
+Right now, these generic classes support only minimal features.
+It is necessary to support more GUI component classes through annotations. 
+
+
+----
+Installation:
+
+Use eclipse:
+define Link, Variable from eclipses windows-> preferences:
+PIVOT_CRUD_PROJECTS_HOME --> the root folder of this prjects.
+
+This project includes modified jar files of Pivots so that it support builder style.(just changing a few wtk class from final to none file.(and an additional runtime class from bxml2java projects)
+
+---
+How to run/test:
+
+run GenericTableVieSample from eclipse.
+see $HOME/pivot-crud-snapshot.png for the GUI image.
+
+
+----
+Sample.
+
+The main sample code is following entity class. It does not require any more code nor code generation to get customized CRUD GUI for teh entity class(the customization is specified as annotation in the class).
+
+@PivotTableView(
+	order = "flag,nation,gold,silver,bronze,total"
+)
+@PivotForm(
+	label = "Olympic Standing"
+)
+public class OlympicStanding {
+    
+	static final String imageFolder = "images/flag/";
+	static final Map<String, Image> flagImageFiles;
+	
+	static Image getImage(final String fileName) throws Exception {
+		return Image.load(ClassLoader.getSystemResource(imageFolder+fileName));
+	}
+	static {
+		try {
+			flagImageFiles = new HashMap<String, Image>() {{
+				put("United States", getImage("us.png"));
+				put("China", getImage("cn.png"));
+				put("Russia", getImage("ru.png"));
+				put("Great Britain", getImage("gb.png"));
+				put("Germany", getImage("de.png"));
+				put("Australia", getImage("au.png"));
+				put("South Korea", getImage("kr.png"));
+				put("Japan", getImage("jp.png"));
+				put("Italy", getImage("it.png"));
+				put("France", getImage("fr.png"));
+			}};
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@PivotFormItem(
+		    label = "Nation",
+		    flag = "",
+		    
+		    text = "",
+		    textSize = 10,
+		    maximumLength = 100,
+		    validator = "" // JavaScript
+		)
+	public String nation = null;
+	
+	@PivotFormItem(
+	    label = "Gold",
+	    flag = "",
+	    
+	    text = "",
+	    textSize = 10,
+	    maximumLength = 100,
+	    validator = "" // JavaScript
+	)
+	public int gold = 0;
+	
+	@PivotFormItem(
+		    label = "Silver",
+		    flag = "",
+		    
+		    text = "",
+		    textSize = 10,
+		    maximumLength = 100,
+		    validator = "" // JavaScript
+		)
+	public int silver = 0;
+    
+	@PivotFormItem(
+		    label = "Bronze",
+		    flag = "",
+		    
+		    text = "",
+		    textSize = 10,
+		    maximumLength = 100,
+		    validator = "" // JavaScript
+		)
+	public int bronze = 0;
+
+	@PivotTableViewColumn(
+	    name = "flag",
+	    width = 25,
+	    cellRenderer = "new org.apache.pivot.wtk.content.TableViewImageCellRenderer()"
+	)
+	public Image getFlag() {	
+		return flagImageFiles.get(nation);
+	}
+	
+	@PivotTableViewColumn(
+	    name = "nation",
+	    headerData = "'Nation'",
+	    width = 3,
+	    relative = true
+	)
+	public String getNation() {
+	  return nation;
+	}
+
+	public void setNation(String nation) {
+	  this.nation = nation;
+	}
+
+	@PivotTableViewColumn(
+	    name = "gold",
+	    headerData = "'Gold'",
+	    width = 1,
+	    relative = true
+	)
+	public int getGold() {
+	  return gold;
+	}
+
+	public void setGold(int gold) {
+	  this.gold = gold;
+	}
+
+	@PivotTableViewColumn(
+	    name = "silver",
+	    headerData = "'Silver'",
+	    width = 1,
+	    relative = true
+	)
+	public int getSilver() {
+	  return silver;
+	}
+
+	public void setSilver(int silver) {
+	  this.silver = silver;
+	}
+
+	@PivotTableViewColumn(
+	    name = "bronze",
+	    headerData = "'Bronze'",
+	    width = 1,
+	    relative = true
+	)
+	public int getBronze() {
+	  return bronze;
+	}
+
+	public void setBronze(int bronze) {
+	  this.bronze = bronze;
+	}
+
+	@PivotTableViewColumn(
+	    name = "total",
+	    headerData = "'Total'",
+	    width = 1,
+	    relative = true
+	)
+	public int getTotal() {
+	  return (gold + silver + bronze);
+	}
+}

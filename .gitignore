@@ -1,0 +1,11 @@
+.directory
+*.class
+*.log
+*.orig
+*~
+ide/netbeans/nbproject/private/*
+ide/netbeans/build/*
+ide/netbeans/dist/*
+ide/netbeans/xml-resources/jaxb/*
+pivot-crud/bin/*
+pivot-crud-sample/bin/*

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>pivot-crud</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>java</name>
+			<type>2</type>
+			<locationURI>PIVOT_CRUD_PROJECTS_HOME/pivot-crud/src/main/java</locationURI>
+		</link>
+		<link>
+			<name>resources</name>
+			<type>2</type>
+			<locationURI>PIVOT_CRUD_PROJECTS_HOME/pivot-crud/src/main/resources</locationURI>
+		</link>
+	</linkedResources>
+</projectDescription>
