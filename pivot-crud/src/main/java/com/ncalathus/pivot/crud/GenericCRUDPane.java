@@ -36,14 +36,6 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 
     public abstract Object getId(T t);
 	
-/*
-	public GenericTableView<T> getTableView() {
-		return (GenericTableView<T>)namespace.get(MAIN_TABLE_VIEW);
-	}
-	public GenericForm<T> getMainForm() {
-		return (GenericForm<T>)namespace.get(MAIN_FORM);
-	}
-*/
 	private final Action getCRUDAction(final String key) {
 		return (Action)namespace.get(key);
 	}
