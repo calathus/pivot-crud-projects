@@ -2,9 +2,7 @@ package com.ncalathus.pivot.crud;
 
 import java.net.URL;
 
-import org.apache.pivot.collections.HashMap;
 import org.apache.pivot.collections.List;
-import org.apache.pivot.collections.Map;
 import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.wtk.Action;
 import org.apache.pivot.wtk.Border;
@@ -22,23 +20,14 @@ import org.apache.pivot.wtk.content.ButtonData;
 
 public abstract class GenericCRUDPane<T> extends SplitPane {
 	private static final String imageFolder = "images/";
-	
-	private static final String 
-		MAIN_FORM = "mainform",
-		MAIN_TABLE_VIEW = "maintableView";
-	
+
 	private final Class<T> cls;
-	private final Map<String, Object> namespace = new HashMap<String, Object>();
 	
 	final MainTableView tableView;
 	final FormContent formContent;
 	final FormCommandsPane formCommandsPane;
 
     public abstract Object getId(T t);
-	
-	private final Action getCRUDAction(final String key) {
-		return (Action)namespace.get(key);
-	}
 	
 	private static URL getURL(final String fileName) {
 		return ClassLoader.getSystemResource(imageFolder+fileName);
@@ -77,19 +66,25 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
         }});   
            
 	}
+	
+	//
+	public void addItem(T t) {
+		tableView.add(t);
+	}
 
 	//
 	// TableView
 	//
 	class MainTableView extends GenericTableView<T> {
+		final Action addItemAction;
+		final Action updateItemAction;
+		final Action removeItemAction;
+		
 		MainTableView() throws Exception {
 			super(cls);
 			
-			//
-			namespace.put(MAIN_TABLE_VIEW, this);
-			
 		    // Action invoked to add a new element
-		    namespace.put(ADD_ITE_ACTION, new Action(false) {
+		    this.addItemAction = new Action(false) {
 		        @Override
 		        @SuppressWarnings("unchecked")
 		        public void perform(Component source) {
@@ -100,10 +95,10 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 
 		            refreshTable();
 		        }
-		    });
+		    };
 		    
 		    // Action invoked to add a new element
-		    final Action updateItemAction = new Action(false) {
+		    this.updateItemAction = new Action(false) {
 		        @Override
 		        @SuppressWarnings("unchecked")
 		        public void perform(Component source) {
@@ -121,10 +116,9 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 		            refreshTable();
 		        }
 		    };
-		    namespace.put(UPDATE_ITE_ACTION, updateItemAction);
 		    
 		    // Action invoke to remove selected elements
-		    final Action removeItemAction = new Action(false) {
+		    this.removeItemAction = new Action(false) {
 		        @Override
 		        public void perform(Component source) {
 		            int selectedIndex = getFirstSelectedIndex();
@@ -144,19 +138,18 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 		            }
 		        }
 		    };
-		    namespace.put(REMOVE_ITE_ACTION, removeItemAction);
 
 			getTableViewSelectionListeners().add(new TableViewSelectionListener.Adapter() {
                 @Override
                 public void selectedRangesChanged(TableView tableView, Sequence<Span> previousSelectedRanges) {
                     int firstSelectedIndex = getFirstSelectedIndex();
                     boolean selected = firstSelectedIndex != -1;
-                    getCRUDAction(NEW_ITEM_ACTION).setEnabled(!selected);
-                    getCRUDAction(ADD_ITE_ACTION).setEnabled(!selected);
-                    getCRUDAction(EDIT_ITE_ACTION).setEnabled(selected);
-                    getCRUDAction(UPDATE_ITE_ACTION).setEnabled(!selected);
+                    addItemAction.setEnabled(!selected);
+                    updateItemAction.setEnabled(!selected);
 		        	removeItemAction.setEnabled(selected);
-                    getCRUDAction(CANCEL_ITE_ACTION).setEnabled(selected);
+		        	formContent.newItemAction.setEnabled(!selected);
+		        	formContent.editItemAction.setEnabled(selected);
+		        	formContent.cancelItemAction.setEnabled(selected);
                    
                     refreshDetail();
                 }
@@ -192,8 +185,6 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 	        } else {
 	        	t = newInstance();
 	        }
-	        //new Exception().printStackTrace();
-	        System.out.println(">> refreshDetail "+t.toString());
 	        formContent.loadData(t);
 	    }
 	}
@@ -201,14 +192,6 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 	//
 	// Form 
 	//
-	private static final String
-	NEW_ITEM_ACTION = "newItemAction",
-	ADD_ITE_ACTION = "addItemAction",
-	EDIT_ITE_ACTION = "editItemAction",
-	UPDATE_ITE_ACTION = "updateItemAction",
-	REMOVE_ITE_ACTION = "removeItemAction",
-	CANCEL_ITE_ACTION = "cancelItemAction";
-
 	class FormCommandsPane extends BoxPane {
 		FormCommandsPane() {
         	setOrientation(Orientation.HORIZONTAL);
@@ -219,7 +202,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
                 	setText("New");
                     setIcon(getURL("add.png"));
                 }}); // INSTANCE, name: <content:ButtonData>
-                setAction(getCRUDAction(NEW_ITEM_ACTION));
+                setAction(formContent.newItemAction);
             }}); // INSTANCE, name: <LinkButton>
             add(new LinkButton() {{
                 setEnabled(true);
@@ -228,7 +211,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
                 	setText("Add");
                     setIcon(getURL("add.png"));
                 }}); // INSTANCE, name: <content:ButtonData>
-                setAction(getCRUDAction(ADD_ITE_ACTION));
+                setAction(tableView.addItemAction);
             }}); // INSTANCE, name: <LinkButton>
             add(new LinkButton() {{
                 setEnabled(true);
@@ -237,7 +220,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
                 	setText("Edit");
                     setIcon(getURL("add.png"));
                 }}); // INSTANCE, name: <content:ButtonData>
-                setAction(getCRUDAction(EDIT_ITE_ACTION));
+                setAction(formContent.editItemAction);
             }}); // INSTANCE, name: <LinkButton>
             add(new LinkButton() {{
                 setEnabled(true);
@@ -246,7 +229,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
                 	setText("Update");
                     setIcon(getURL("add.png"));
                 }}); // INSTANCE, name: <content:ButtonData>
-                setAction(getCRUDAction(UPDATE_ITE_ACTION));
+                setAction(tableView.updateItemAction);
             }}); // INSTANCE, name: <LinkButton>
             add(new LinkButton() {{
                 setEnabled(true);
@@ -255,7 +238,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
                 	setText("Delete");
                     setIcon(getURL("delete.png"));
                 }}); // INSTANCE, name: <content:ButtonData>
-                setAction(getCRUDAction(REMOVE_ITE_ACTION));
+                setAction(tableView.removeItemAction);
             }}); // INSTANCE, name: <LinkButton>
             add(new LinkButton() {{
                 setEnabled(true);
@@ -264,73 +247,63 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
                 	setText("Cancel");
                     setIcon(getURL("delete.png"));
                 }}); // INSTANCE, name: <content:ButtonData>
-                setAction(getCRUDAction(CANCEL_ITE_ACTION));
+                setAction(formContent.cancelItemAction);
             }}); // INSTANCE, name: <LinkButton>
 		}
 	}
 	
 	class FormContent extends GenericForm<T> {
+		final Action newItemAction;
+		final Action editItemAction;
+		final Action cancelItemAction;
+		
 		FormContent() throws Exception {
 			super(cls);
 			
-        	//
-        	namespace.put(MAIN_FORM, this);
-        	
-		    namespace.put(EDIT_ITE_ACTION, new Action(false) {
+		    this.editItemAction = new Action(false) {
 		        @Override
 		        @SuppressWarnings("unchecked")
 		        public void perform(Component source) {
 		        	edit(true);
 		        	
-		        	setEnabled(false);
-		        	setEnabled0(ADD_ITE_ACTION, false);
-		        	setEnabled0(REMOVE_ITE_ACTION, false);
-		        	setEnabled0(NEW_ITEM_ACTION, false);
-		        	
-		        	setEnabled0(UPDATE_ITE_ACTION, true);
-		        	setEnabled0(CANCEL_ITE_ACTION, true);
+		        	tableView.addItemAction.setEnabled(false);
+		        	tableView.updateItemAction.setEnabled(true);
+		        	tableView.removeItemAction.setEnabled(false);
+		        	newItemAction.setEnabled(false);
+		        	editItemAction.setEnabled(false);
+		        	cancelItemAction.setEnabled(true);
 		        }
-		    });
-		    namespace.put(NEW_ITEM_ACTION, new Action(true) {
+		    };
+		    this.newItemAction = new Action(true) {
 		        @Override
 		        @SuppressWarnings("unchecked")
 		        public void perform(Component source) {
 		        	tableView.setSelectedIndex(-1);
         	        clear(true);
         	        
-		        	setEnabled(false);
-		        	setEnabled0(EDIT_ITE_ACTION, false);
-		        	setEnabled0(UPDATE_ITE_ACTION, false);
-		        	setEnabled0(REMOVE_ITE_ACTION, false);
-		        	
-		        	setEnabled0(ADD_ITE_ACTION, true);
-		        	setEnabled0(CANCEL_ITE_ACTION, true);
+		        	tableView.addItemAction.setEnabled(true);
+		        	tableView.updateItemAction.setEnabled(false);
+		        	tableView.removeItemAction.setEnabled(false);
+		        	newItemAction.setEnabled(false);
+		        	editItemAction.setEnabled(false);
+		        	cancelItemAction.setEnabled(true);
 		        }
-		    });
-		    namespace.put(CANCEL_ITE_ACTION, new Action(false) {
+		    };
+		    this.cancelItemAction = new Action(false) {
 		        @Override
 		        @SuppressWarnings("unchecked")
 		        public void perform(Component source) {
 		        	tableView.setSelectedIndex(-1);
         	        clear(false);
         	        
-		        	setEnabled(false);
-		        	setEnabled0(NEW_ITEM_ACTION, true);
-		        	
-		        	setEnabled0(ADD_ITE_ACTION, false);
-		        	setEnabled0(EDIT_ITE_ACTION, false);
-		        	setEnabled0(UPDATE_ITE_ACTION, false);
-		        	setEnabled0(REMOVE_ITE_ACTION, false);
+		        	tableView.addItemAction.setEnabled(false);
+		        	tableView.updateItemAction.setEnabled(false);
+		        	tableView.removeItemAction.setEnabled(false);
+		        	newItemAction.setEnabled(true);
+		        	editItemAction.setEnabled(false);
+		        	cancelItemAction.setEnabled(false);
 		        }
-		    });
+		    };
 		}
-		void setEnabled0(String actionName, boolean b) {
-			getCRUDAction(actionName).setEnabled(b);
-		}
-	}
-	
-	//
-	public void addItem(T t) {
-		tableView.add(t);
 	}
 }
