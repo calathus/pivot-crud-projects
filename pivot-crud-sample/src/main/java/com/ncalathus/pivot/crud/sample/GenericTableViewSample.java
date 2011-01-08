@@ -62,7 +62,9 @@ public class GenericTableViewSample implements Application {
             };
             setContent(crudPane);
             
-            crudPane.getTableView().add(createOlympicStandings());
+            for (OlympicStanding os: createOlympicStandings()) {
+            	crudPane.addItem(os);
+            }
 
             CodeEmitterRuntime.initialize(this, namespace);
         }};

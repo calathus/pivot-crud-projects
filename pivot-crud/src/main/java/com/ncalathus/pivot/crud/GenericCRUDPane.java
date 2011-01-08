@@ -21,14 +21,37 @@ import org.apache.pivot.wtk.TableViewSelectionListener;
 import org.apache.pivot.wtk.content.ButtonData;
 
 public abstract class GenericCRUDPane<T> extends SplitPane {
-	private final Class<T> cls;
-	private final Map<String, Object> namespace = new HashMap<String, Object>();
 	private static final String imageFolder = "images/";
 	
 	private static final String 
 		MAIN_FORM = "mainform",
 		MAIN_TABLE_VIEW = "maintableView";
 	
+	private final Class<T> cls;
+	private final Map<String, Object> namespace = new HashMap<String, Object>();
+	
+	final MainTableView tableView;
+	final FormContent formContent;
+	final FormCommandsPane formCommandsPane;
+
+    public abstract Object getId(T t);
+	
+/*
+	public GenericTableView<T> getTableView() {
+		return (GenericTableView<T>)namespace.get(MAIN_TABLE_VIEW);
+	}
+	public GenericForm<T> getMainForm() {
+		return (GenericForm<T>)namespace.get(MAIN_FORM);
+	}
+*/
+	private final Action getCRUDAction(final String key) {
+		return (Action)namespace.get(key);
+	}
+	
+	private static URL getURL(final String fileName) {
+		return ClassLoader.getSystemResource(imageFolder+fileName);
+	}
+
 	public GenericCRUDPane(final Class<T> cls) throws Exception {
 		super(Orientation.VERTICAL);
 		this.cls = cls;
@@ -36,9 +59,9 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 		setSplitRatio(0.4f);
 		
 		// need to create components in this order, tableView, formContent, formCommandsPane
-		final MainTableView tableView = new MainTableView();
-		final FormContent formContent = new FormContent();
-		final FormCommandsPane formCommandsPane = new FormCommandsPane();
+		this.tableView = new MainTableView();
+		this.formContent = new FormContent();
+		this.formCommandsPane = new FormCommandsPane();
 		
 		setLeft(new Border() {{
         	setContent(
@@ -46,7 +69,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
     				setHorizontalScrollBarPolicy(ScrollPane.ScrollBarPolicy.FILL);
     				setView(tableView);
     				setColumnHeader(new TableViewHeader() {{
-    	    			setTableView(getTableView());
+    	    			setTableView(tableView);
     	    			setSortMode(TableViewHeader.SortMode.MULTI_COLUMN);
     	    		}});
     			}});
@@ -61,24 +84,6 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
             }});
         }});   
            
-	}
-	
-    public abstract Object getId(T t);
-		
-
-	public GenericTableView<T> getTableView() {
-		return (GenericTableView<T>)namespace.get(MAIN_TABLE_VIEW);
-	}
-	public GenericForm<T> getMainForm() {
-		return (GenericForm<T>)namespace.get(MAIN_FORM);
-	}
-
-	private final Action getCRUDAction(final String key) {
-		return (Action)namespace.get(key);
-	}
-	
-	private static URL getURL(final String fileName) {
-		return ClassLoader.getSystemResource(imageFolder+fileName);
 	}
 
 	//
@@ -96,7 +101,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 		        @Override
 		        @SuppressWarnings("unchecked")
 		        public void perform(Component source) {
-		        	final T t = getMainForm().createItem();
+		        	final T t = formContent.createItem();
 		        	final List<T> tableData = (List<T>)getTableData();
 		        	final int index = tableData.add(t);
 	                setSelectedIndex(index);
@@ -110,14 +115,13 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 		        @Override
 		        @SuppressWarnings("unchecked")
 		        public void perform(Component source) {
-		        	final GenericForm<T> form = getMainForm();
-		        	final T t = form.createItem();
+		        	final T t = formContent.createItem();
 		        	final Object  id = getId(t);
 		        	final List<T> tableData = (List<T>)getTableData();
 		        	for (T t0: tableData) {
 		        		Object id0 = getId(t0);
 		        		if (id.equals(id0)) {
-		        			form.updateItem(t0, t);
+		        			formContent.updateItem(t0, t);
 		        			break;
 		        		}
 		        	}
@@ -198,7 +202,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 	        }
 	        //new Exception().printStackTrace();
 	        System.out.println(">> refreshDetail "+t.toString());
-	        getMainForm().loadData(t);
+	        formContent.loadData(t);
 	    }
 	}
 	
@@ -299,7 +303,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 		        @Override
 		        @SuppressWarnings("unchecked")
 		        public void perform(Component source) {
-		        	getTableView().setSelectedIndex(-1);
+		        	tableView.setSelectedIndex(-1);
         	        clear(true);
         	        
 		        	setEnabled(false);
@@ -315,7 +319,7 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 		        @Override
 		        @SuppressWarnings("unchecked")
 		        public void perform(Component source) {
-		        	getTableView().setSelectedIndex(-1);
+		        	tableView.setSelectedIndex(-1);
         	        clear(false);
         	        
 		        	setEnabled(false);
@@ -331,5 +335,10 @@ public abstract class GenericCRUDPane<T> extends SplitPane {
 		void setEnabled0(String actionName, boolean b) {
 			getCRUDAction(actionName).setEnabled(b);
 		}
+	}
+	
+	//
+	public void addItem(T t) {
+		tableView.add(t);
 	}
 }
